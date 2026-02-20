@@ -31,7 +31,7 @@
 
     @media (max-width: 768px){
       html, body{
-        height: auto;
+        height: auto !important;
       }
     }
 
@@ -174,19 +174,19 @@
     
     @media (max-width: 768px){
       .wrap{
-        min-height: auto;
         display: block;
         padding-top: 120px;
         padding-bottom: 80px;
+        min-height: unset !important;
       }
     }
     
     @media (max-width: 520px){
       .wrap{
-        min-height: auto;
         display: block;
         padding-top: 80px;
         padding-bottom: 80px;
+        min-height: unset !important;
       }
     }
 
@@ -349,6 +349,10 @@
     }
 
     @media (max-width: 520px){
+      .wrap{
+        padding-top: 80px;
+        padding-bottom: 40px;
+      }
       button{ width: 100%; }
       .hero{ border-radius: 14px; }
     }
@@ -417,7 +421,7 @@
     let locked = false;
 
     // ========= Carregar prescripts de arquivo externo =========
-    const EXTERNAL_FILE_URL = "./prescriptslcbr.json";
+    const EXTERNAL_FILE_URL = "./prescripts.json";
 
     async function loadExternalPrescripts(){
       const res = await fetch(EXTERNAL_FILE_URL, { cache: "no-store" });
@@ -480,23 +484,23 @@
     // ========= Verifica limite de 1 por dia =========
     function canUsePrescriptToday(){
       const today = new Date().toDateString();
-      const lastUsed = localStorage.getItem("prescript_date_lcbr");
+      const lastUsed = localStorage.getItem("prescript_date");
       return lastUsed !== today;
     }
 
     function savePrescriptUsageToday(prescript){
       const today = new Date().toDateString();
-      localStorage.setItem("prescript_date_lcbr", today);
-      localStorage.setItem("prescript_text_lcbr", prescript);
+      localStorage.setItem("prescript_date", today);
+      localStorage.setItem("prescript_text", prescript);
     }
 
     function getPreviousprescript(){
-      return localStorage.getItem("prescript_text_lcbr");
+      return localStorage.getItem("prescript_text");
     }
 
     function getTimeUntilNextprescript(){
       const today = new Date().toDateString();
-      const lastUsed = localStorage.getItem("prescript_date_lcbr");
+      const lastUsed = localStorage.getItem("prescript_date");
       
       if (lastUsed === today) {
         const now = new Date();
@@ -543,8 +547,8 @@
     });
     
     function resetprescript(){
-      localStorage.removeItem("prescript_date_lcbr");
-      localStorage.removeItem("prescript_text_lcbr");
+      localStorage.removeItem("prescript_date");
+      localStorage.removeItem("prescript_text");
       locked = false;
       btn.classList.remove("fading");
       terminal.classList.remove("show");
@@ -560,7 +564,7 @@
       
       // Cria imagem de impacto
       const impactImg = document.createElement("img");
-      impactImg.src = "https://limbuscompany.wiki.gg/images/Durante_Hokma_Pigritia.png";
+      impactImg.src = "./durante.png";
       impactImg.className = "impact-image";
       document.body.appendChild(impactImg);
       
@@ -620,7 +624,7 @@
         }, 260);
       }catch(e){
         console.error("Erro ao carregar prescripts:", e);
-        textEl.textContent = "Erro ao carregar prescripts. Verifique se prescriptslcbr.json existe.";
+        textEl.textContent = "Erro ao carregar prescripts. Verifique se prescripts.json existe.";
         terminal.classList.add("show");
       }
     });
