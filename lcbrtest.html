@@ -610,7 +610,7 @@
         const timeLeft = getTimeUntilNextprescript();
         const previousprescript = getPreviousprescript();
         const message = previousprescript 
-          ? `${previousprescript}\nJÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}\n`
+          ? `${previousprescript}\n---\nJÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}\n`
           : `JÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}`;
         textEl.textContent = message;
         return;
@@ -646,3 +646,4 @@
   </script>
 </body>
 </html>
+
