@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prescript</title>
+
+  <!-- 8-bit font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --blue:#67b7ff;
+      --blue2:#1f6bff;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Efeito de glitch VHS */
+    body.glitch::before{
+      content:"";
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events:none;
+      animation:vhsGlitch 0.5s ease-in-out;
+      z-index:9999;
+    }
+
+    @keyframes vhsGlitch{
+      0%{
+        transform:translate(0);
+        opacity:0.8;
+      }
+      10%{
+        transform:translate(-10px, 5px);
+        opacity:1;
+      }
+      20%{
+        transform:translate(8px, -3px);
+        opacity:0.9;
+      }
+      30%{
+        transform:translate(-6px, 8px);
+        opacity:1;
+      }
+      40%{
+        transform:translate(12px, -6px);
+        opacity:0.8;
+      }
+      50%{
+        transform:translate(-8px, 4px);
+        opacity:1;
+      }
+      60%{
+        transform:translate(10px, -8px);
+        opacity:0.9;
+      }
+      70%{
+        transform:translate(-12px, 6px);
+        opacity:1;
+      }
+      80%{
+        transform:translate(6px, -4px);
+        opacity:0.8;
+      }
+      90%{
+        transform:translate(-4px, 8px);
+        opacity:0.95;
+      }
+      100%{
+        transform:translate(0);
+        opacity:0;
+      }
+    }
+
+    @keyframes shake{
+      0%, 100%{
+        transform:translateX(0) rotate(0deg);
+      }
+      10%{
+        transform:translateX(-5px) rotate(-0.5deg);
+      }
+      20%{
+        transform:translateX(5px) rotate(0.5deg);
+      }
+      30%{
+        transform:translateX(-5px) rotate(-0.5deg);
+      }
+      40%{
+        transform:translateX(5px) rotate(0.5deg);
+      }
+      50%{
+        transform:translateX(-5px) rotate(-0.5deg);
+      }
+      60%{
+        transform:translateX(5px) rotate(0.5deg);
+      }
+      70%{
+        transform:translateX(-5px) rotate(-0.5deg);
+      }
+      80%{
+        transform:translateX(5px) rotate(0.5deg);
+      }
+      90%{
+        transform:translateX(-5px) rotate(-0.5deg);
+      }
+    }
+
+    body.glitch{
+      animation:shake 0.5s;
+    }
+
+    /* subtle vignette + grain */
+    .fx::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        radial-gradient(900px 520px at 50% 85%, rgba(103,183,255,0.06), rgba(0,0,0,0) 60%),
+        radial-gradient(closest-side at 50% 50%, rgba(0,0,0,0), rgba(0,0,0,0.55));
+      pointer-events:none;
+    }
+    .fx::after{
+      content:"";
+      position:fixed; inset:-30%;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+      opacity:.06;
+      mix-blend-mode:screen;
+      pointer-events:none;
+      animation: drift 10s linear infinite;
+    }
+    @keyframes drift{
+      from{ transform:translate3d(0,0,0); }
+      to{ transform:translate3d(6%, -4%, 0); }
+    }
+
+    .wrap{
+      position:relative;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      align-items: start;
+      padding-top: 260px;
+    }
+    
+    @media (max-width: 768px){
+      .wrap{
+        padding-top: 120px;
+      }
+    }
+    
+    @media (max-width: 520px){
+      .wrap{
+        padding-top: 80px;
+      }
+    }
+
+    .stage{
+      width:min(900px, 92vw);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:28px;
+    }
+
+    .hero{
+      width:min(550px, 75vw);
+      aspect-ratio: 16/9;
+      overflow:hidden;
+      position:relative;
+      z-index: 10;
+      background-image: url("https://limbuscompany.wiki.gg/images/The_Index_Logo.png?v=20260220");
+      background-size:contain;
+      background-position:center;
+      background-repeat:no-repeat;
+    }
+
+    .controls{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      width:100%;
+      position: relative;
+    }
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.98);
+      color:#000;
+      padding: 28px 48px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-family: inherit;
+      font-size: 18px;
+      letter-spacing: 0.6px;
+      margin-top: 10px;
+      box-shadow:
+        0 0 0 2px rgba(31,107,255,0.0),
+        0 0 22px rgba(103,183,255,0.55),
+        0 0 60px rgba(31,107,255,0.25);
+      transition: transform .12s ease, opacity .28s ease, box-shadow .22s ease;
+      user-select:none;
+    }
+    button:hover{
+      transform: translateY(-1px);
+      box-shadow:
+        0 0 0 2px rgba(31,107,255,0.20),
+        0 0 28px rgba(103,183,255,0.70),
+        0 0 70px rgba(31,107,255,0.30);
+    }
+    button:active{ transform: translateY(0px) scale(0.99); }
+
+    button.fading{
+      pointer-events:none;
+      animation: digitalFade 0.5s ease-out forwards;
+    }
+
+    @keyframes digitalFade{
+      0%{
+        opacity: 1;
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      30%{
+        opacity: 0.8;
+        transform: scale(1.02);
+        filter: brightness(1.3);
+        box-shadow: 
+          0 0 30px rgba(103,183,255,0.8),
+          0 0 60px rgba(31,107,255,0.5),
+          inset 0 0 20px rgba(255,255,255,0.3);
+      }
+      60%{
+        opacity: 0.4;
+        transform: scale(0.98);
+        filter: brightness(1.5);
+        box-shadow: 
+          0 0 40px rgba(103,183,255,1),
+          0 0 80px rgba(31,107,255,0.7);
+      }
+      100%{
+        opacity: 0;
+        transform: scale(0.95);
+        filter: brightness(2);
+        box-shadow: 
+          0 0 50px rgba(103,183,255,0.5),
+          0 0 100px rgba(31,107,255,0.3);
+      }
+    }
+
+    .terminal{
+      position: absolute;
+      top: 1px;
+      left: 0;
+      right: 0;
+      width:min(820px, 92vw);
+      max-height: 60vh;
+      overflow-y: auto;
+      min-height: 148px;
+      padding: 16px;
+      margin: 0 auto;
+      text-align: center;
+      opacity:0;
+      transform: translateY(10px);
+      transition: opacity .35s ease, transform .35s ease;
+      pointer-events: none;
+    }
+    .terminal.show{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    .line{
+      font-size: 22px;
+      line-height: 2.4;
+      color: rgba(255,255,255,0.96);
+      text-shadow:
+        0 0 15px rgba(103,183,255,0.85),
+        0 0 25px rgba(103,183,255,0.60),
+        0 0 35px rgba(31,107,255,0.45);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint{
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: .4px;
+      text-align:center;
+      max-width: 70ch;
+    }
+
+    /* tiny top label, optional */
+    .sig{
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      font-size: 9px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 12px rgba(103,183,255,0.18);
+      user-select:none;
+    }
+
+    @media (max-width: 520px){
+      button{ width: 100%; }
+      .hero{ border-radius: 14px; }
+    }
+
+    /* Imagem de impacto */
+    .impact-image{
+      position:fixed;
+      top:50%;
+      left:50%;
+      width:300px;
+      height:300px;
+      transform:translate(-50%, -50%);
+      z-index:10000;
+      pointer-events:none;
+      animation:impactBounce 1s ease-out forwards;
+    }
+
+    @keyframes impactBounce{
+      0%{
+        opacity:0;
+        transform:translate(-50%, -50%) scale(0.5);
+      }
+      30%{
+        opacity:1;
+        transform:translate(-50%, -50%) scale(1.2);
+      }
+      50%{
+        transform:translate(-50%, -50%) scale(0.95);
+      }
+      70%{
+        transform:translate(-50%, -50%) scale(1);
+      }
+      100%{
+        opacity:0;
+        transform:translate(-50%, -50%) scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body class="fx">
+  <audio id="glitch-sound" preload="auto">
+    <source src="./durante_sfx.mp3" type="audio/mpeg">
+  </audio>
+  <div class="sig">THE INDEX // GERADOR DE PRESCRIPTOS // FEITO POR @BESTOOGA</div>
+
+  <div class="wrap">
+    <div class="stage">
+      <div class="hero" aria-label="Imagem principal"></div>
+
+      <div class="controls">
+        <button id="btn">RECEBER PRESCRIPTO</button>
+
+        <div id="terminal" class="terminal" aria-live="polite">
+          <div class="line" id="text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= Variáveis globais =========
+    const btn = document.getElementById("btn");
+    const terminal = document.getElementById("terminal");
+    const textEl = document.getElementById("text");
+    let locked = false;
+
+    // ========= Carregar prescripts de arquivo externo =========
+    const EXTERNAL_FILE_URL = "./prescriptslcbr.json";
+
+    async function loadExternalPrescripts(){
+      const res = await fetch(EXTERNAL_FILE_URL, { cache: "no-store" });
+      return await res.json();
+    }
+
+    // ========= Seleção aleatória =========
+    function pickRandom(list){
+      const idx = Math.floor(Math.random() * list.length);
+      return list[idx];
+    }
+
+    // ========= Typing effect com roleta de caracteres =========
+    async function typeText(el, text, speedMs = 15){
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*()";
+      
+      el.textContent = "";
+      
+      // Mostra caracteres aleatórios para toda a frase primeiro
+      let display = Array(text.length).fill(0).map(() => 
+        chars[Math.floor(Math.random() * chars.length)]
+      );
+      
+      let resolved = Array(text.length).fill(false);
+      let iterations = 0;
+      const maxIterations = text.length * 1; // controla quantas vezes vai trocar
+      
+      const interval = setInterval(() => {
+        // Atualiza display com caracteres aleatórios ou resolvidos
+        display = display.map((char, index) => {
+          if (resolved[index]) {
+            return text[index];
+          }
+          
+          // Resolve gradualmente da esquerda para direita
+          if (iterations > index * 1) {
+            resolved[index] = true;
+            return text[index];
+          }
+          
+          // Mantém espaços como espaços
+          if (text[index] === ' ') {
+            resolved[index] = true;
+            return ' ';
+          }
+          
+          return chars[Math.floor(Math.random() * chars.length)];
+        });
+        
+        el.textContent = display.join('');
+        iterations++;
+        
+        if (iterations >= maxIterations || resolved.every(r => r)) {
+          clearInterval(interval);
+          el.textContent = text;
+        }
+      }, speedMs);
+    }
+
+    // ========= Verifica limite de 1 por dia =========
+    function canUsePrescriptToday(){
+      const today = new Date().toDateString();
+      const lastUsed = localStorage.getItem("prescript_date_lcbr");
+      return lastUsed !== today;
+    }
+
+    function savePrescriptUsageToday(prescript){
+      const today = new Date().toDateString();
+      localStorage.setItem("prescript_date_lcbr", today);
+      localStorage.setItem("prescript_text_lcbr", prescript);
+    }
+
+    function getPreviousprescript(){
+      return localStorage.getItem("prescript_text_lcbr");
+    }
+
+    function getTimeUntilNextprescript(){
+      const today = new Date().toDateString();
+      const lastUsed = localStorage.getItem("prescript_date_lcbr");
+      
+      if (lastUsed === today) {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        
+        const diff = tomorrow - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        return `${hours}h ${minutes}m`;
+      }
+      return null;
+    }
+
+    // ========= Atalho secreto: resetar prescripto digitando DURANTE =========
+    let secretKeySequence = "";
+    const SECRET_CODE = "DURANTE";
+    
+    document.addEventListener("keydown", (e) => {
+      // Ignora se está digitando em input ou textarea
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+      
+      const key = e.key.toUpperCase();
+      
+      // Apenas letras
+      if (/^[A-Z]$/.test(key)) {
+        secretKeySequence += key;
+        
+        // Mantém apenas os últimos 7 caracteres
+        if (secretKeySequence.length > 7) {
+          secretKeySequence = secretKeySequence.slice(-7);
+        }
+        
+        // Verifica se digitou "DURANTE"
+        if (secretKeySequence === SECRET_CODE) {
+          resetprescript();
+          secretKeySequence = ""; // limpa a sequência
+        }
+      }
+    });
+    
+    function resetprescript(){
+      localStorage.removeItem("prescript_date_lcbr");
+      localStorage.removeItem("prescript_text_lcbr");
+      locked = false;
+      btn.classList.remove("fading");
+      terminal.classList.remove("show");
+      textEl.textContent = "";
+      
+      // Ativa glitch e som
+      document.body.classList.add("glitch");
+      const glitchSound = document.getElementById("glitch-sound");
+      if (glitchSound) {
+        glitchSound.currentTime = 0;
+        glitchSound.play().catch(() => {});
+      }
+      
+      // Cria imagem de impacto
+      const impactImg = document.createElement("img");
+      impactImg.src = "https://limbuscompany.wiki.gg/images/Durante_Hokma_Pigritia.png";
+      impactImg.className = "impact-image";
+      document.body.appendChild(impactImg);
+      
+      // Remove glitch after 0.5s e remove imagem após 1s
+      setTimeout(() => {
+        document.body.classList.remove("glitch");
+      }, 500);
+      
+      setTimeout(() => {
+        impactImg.remove();
+      }, 1000);
+      
+      // Mostra prompt após glitch terminar
+      setTimeout(() => {
+        alert("🎲 PRESCRIPTO RESETADO! Você pode receber um novo agora.");
+      }, 500);
+    }
+
+    btn.addEventListener("click", async () => {
+      if (locked) return;
+      
+      // Verifica se já usou hoje
+      if (!canUsePrescriptToday()) {
+        locked = true;
+        btn.classList.add("fading");
+        setTimeout(() => terminal.classList.add("show"), 180);
+        
+        const timeLeft = getTimeUntilNextprescript();
+        const previousprescript = getPreviousprescript();
+        const message = previousprescript 
+          ? `JÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}\n\n--- SEU PRESCRIPTO DE HOJE ---\n${previousprescript}`
+          : `JÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}`;
+        textEl.textContent = message;
+        return;
+      }
+      
+      locked = true;
+
+      btn.classList.add("fading");
+
+      // mostra "terminal"
+      setTimeout(() => terminal.classList.add("show"), 180);
+
+      // carrega prescripts do arquivo
+      try{
+        const list = await loadExternalPrescripts();
+        
+        // seleciona aleatoriamente e digita
+        const prescript = pickRandom(list);
+
+        // salva que usou hoje (com o prescripto)
+        savePrescriptUsageToday(prescript);
+
+        // delay leve antes de digitar (pra dar drama)
+        setTimeout(() => {
+          typeText(textEl, prescript, 40);
+        }, 260);
+      }catch(e){
+        console.error("Erro ao carregar prescripts:", e);
+        textEl.textContent = "Erro ao carregar prescripts. Verifique se prescriptslcbr.json existe.";
+        terminal.classList.add("show");
+      }
+    });
+  </script>
+</body>
+</html>
