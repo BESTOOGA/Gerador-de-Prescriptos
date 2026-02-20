@@ -174,13 +174,17 @@
     
     @media (max-width: 768px){
       .wrap{
+        min-height: auto;
         padding-top: 120px;
+        padding-bottom: 60px;
       }
     }
     
     @media (max-width: 520px){
       .wrap{
+        min-height: auto;
         padding-top: 80px;
+        padding-bottom: 60px;
       }
     }
 
@@ -347,12 +351,12 @@
       position:fixed;
       top:50%;
       left:50%;
-      width:900px;
-      height:900px;
+      width:300px;
+      height:300px;
       transform:translate(-50%, -50%);
       z-index:10000;
       pointer-events:none;
-      animation:impactBounce 2s ease-out forwards;
+      animation:impactBounce 1s ease-out forwards;
     }
 
     @keyframes impactBounce{
