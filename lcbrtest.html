@@ -188,6 +188,15 @@
       }
     }
 
+    /* MOBILE: desativa overlays fixos que travam scroll */
+    @media (max-width: 768px){
+      .fx::before,
+      .fx::after{
+        content: none !important;
+        display: none !important;
+      }
+    }
+
     .stage{
       width:min(900px, 92vw);
       display:flex;
@@ -386,7 +395,7 @@
   <audio id="glitch-sound" preload="auto">
     <source src="./durante_sfx.mp3" type="audio/mpeg">
   </audio>
-  <div class="sig">THE INDEX // GERADOR DE PRESCRIPTOS // FEITO POR @BESTOOGA // v0.0.2</div>
+  <div class="sig">THE INDEX // GERADOR DE PRESCRIPTOS // FEITO POR @BESTOOGA // V 0.0.3</div>
 
   <div class="wrap">
     <div class="stage">
