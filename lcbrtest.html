@@ -191,6 +191,19 @@
       }
     }
 
+    @media (max-width: 768px){
+      .terminal{
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        max-height: none;
+        overflow: visible;
+        pointer-events: auto;
+        margin-top: 16px;
+      }
+    }
+
     /* MOBILE: desativa overlays fixos que travam scroll */
     @media (max-width: 768px){
       .fx::before,
@@ -301,8 +314,8 @@
       left: 0;
       right: 0;
       width:min(820px, 92vw);
-      max-height: 60vh;
-      overflow-y: auto;
+      max-height: none;
+      overflow: hidden;
       min-height: 148px;
       padding: 16px;
       margin: 0 auto;
@@ -315,6 +328,11 @@
     .terminal.show{
       opacity:1;
       transform: translateY(0);
+      overflow-y: auto;
+      max-height: 60dvh;
+      -webkit-overflow-scrolling: touch;
+      pointer-events: auto;
+      overscroll-behavior: contain;
     }
 
     .line{
@@ -350,10 +368,6 @@
     }
 
     @media (max-width: 520px){
-      .wrap{
-        padding-top: 80px;
-        padding-bottom: 40px;
-      }
       button{ width: 100%; }
       .hero{ border-radius: 14px; }
     }
@@ -398,7 +412,7 @@
   <audio id="glitch-sound" preload="auto">
     <source src="./durante_sfx.mp3" type="audio/mpeg">
   </audio>
-  <div class="sig">THE INDEX // GERADOR DE PRESCRIPTOS // FEITO POR @BESTOOGA</div>
+  <div class="sig">THE INDEX // GERADOR DE PRESCRIPTOS // FEITO POR @BESTOOGA // v5</div>
 
   <div class="wrap">
     <div class="stage">
@@ -422,7 +436,7 @@
     let locked = false;
 
     // ========= Carregar prescripts de arquivo externo =========
-    const EXTERNAL_FILE_URL = "./prescripts.json";
+    const EXTERNAL_FILE_URL = "./prescriptslcbr.json";
 
     async function loadExternalPrescripts(){
       const res = await fetch(EXTERNAL_FILE_URL, { cache: "no-store" });
@@ -485,23 +499,23 @@
     // ========= Verifica limite de 1 por dia =========
     function canUsePrescriptToday(){
       const today = new Date().toDateString();
-      const lastUsed = localStorage.getItem("prescript_date");
+      const lastUsed = localStorage.getItem("prescript_date_lcbr");
       return lastUsed !== today;
     }
 
     function savePrescriptUsageToday(prescript){
       const today = new Date().toDateString();
-      localStorage.setItem("prescript_date", today);
-      localStorage.setItem("prescript_text", prescript);
+      localStorage.setItem("prescript_date_lcbr", today);
+      localStorage.setItem("prescript_text_lcbr", prescript);
     }
 
     function getPreviousprescript(){
-      return localStorage.getItem("prescript_text");
+      return localStorage.getItem("prescript_text_lcbr");
     }
 
     function getTimeUntilNextprescript(){
       const today = new Date().toDateString();
-      const lastUsed = localStorage.getItem("prescript_date");
+      const lastUsed = localStorage.getItem("prescript_date_lcbr");
       
       if (lastUsed === today) {
         const now = new Date();
@@ -548,8 +562,8 @@
     });
     
     function resetprescript(){
-      localStorage.removeItem("prescript_date");
-      localStorage.removeItem("prescript_text");
+      localStorage.removeItem("prescript_date_lcbr");
+      localStorage.removeItem("prescript_text_lcbr");
       locked = false;
       btn.classList.remove("fading");
       terminal.classList.remove("show");
@@ -565,7 +579,7 @@
       
       // Cria imagem de impacto
       const impactImg = document.createElement("img");
-      impactImg.src = "./durante.png";
+      impactImg.src = "https://limbuscompany.wiki.gg/images/Durante_Hokma_Pigritia.png";
       impactImg.className = "impact-image";
       document.body.appendChild(impactImg);
       
@@ -625,7 +639,7 @@
         }, 260);
       }catch(e){
         console.error("Erro ao carregar prescripts:", e);
-        textEl.textContent = "Erro ao carregar prescripts. Verifique se prescripts.json existe.";
+        textEl.textContent = "Erro ao carregar prescripts. Verifique se prescriptslcbr.json existe.";
         terminal.classList.add("show");
       }
     });
