@@ -25,7 +25,8 @@
       background: var(--bg);
       color: var(--fg);
       font-family: "Press Start 2P", system-ui, sans-serif;
-      overflow:hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     /* subtle vignette + grain */
@@ -53,12 +54,24 @@
 
     .wrap{
       position:relative;
-      height:100%;
+      min-height:100vh;
       display:grid;
       place-items:center;
       padding:24px;
       align-items: start;
       padding-top: 260px;
+    }
+    
+    @media (max-width: 768px){
+      .wrap{
+        padding-top: 120px;
+      }
+    }
+    
+    @media (max-width: 520px){
+      .wrap{
+        padding-top: 80px;
+      }
     }
 
     .stage{
@@ -75,7 +88,7 @@
       overflow:hidden;
       position:relative;
       z-index: 10;
-      background-image: url("https://limbuscompany.wiki.gg/images/The_Index_Logo.png");
+      background-image: url("https://limbuscompany.wiki.gg/images/The_Index_Logo.png?v=20260220");
       background-size:contain;
       background-position:center;
       background-repeat:no-repeat;
@@ -162,6 +175,8 @@
       left: 0;
       right: 0;
       width:min(820px, 92vw);
+      max-height: 60vh;
+      overflow-y: auto;
       min-height: 148px;
       padding: 16px;
       margin: 0 auto;
@@ -233,6 +248,12 @@
   </div>
 
   <script>
+    // ========= Variáveis globais =========
+    const btn = document.getElementById("btn");
+    const terminal = document.getElementById("terminal");
+    const textEl = document.getElementById("text");
+    let locked = false;
+
     // ========= Carregar prescripts de arquivo externo =========
     const EXTERNAL_FILE_URL = "./prescriptslcbr.json";
 
@@ -294,15 +315,99 @@
       }, speedMs);
     }
 
-    // ========= UI =========
-    const btn = document.getElementById("btn");
-    const terminal = document.getElementById("terminal");
-    const textEl = document.getElementById("text");
+    // ========= Verifica limite de 1 por dia =========
+    function canUsePrescriptToday(){
+      const today = new Date().toDateString();
+      const lastUsed = localStorage.getItem("prescript_date_lcbr");
+      return lastUsed !== today;
+    }
 
-    let locked = false;
+    function savePrescriptUsageToday(prescript){
+      const today = new Date().toDateString();
+      localStorage.setItem("prescript_date_lcbr", today);
+      localStorage.setItem("prescript_text_lcbr", prescript);
+    }
+
+    function getPreviousprescript(){
+      return localStorage.getItem("prescript_text_lcbr");
+    }
+
+    function getTimeUntilNextprescript(){
+      const today = new Date().toDateString();
+      const lastUsed = localStorage.getItem("prescript_date_lcbr");
+      
+      if (lastUsed === today) {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        
+        const diff = tomorrow - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        return `${hours}h ${minutes}m`;
+      }
+      return null;
+    }
+
+    // ========= Atalho secreto: resetar prescripto digitando DURANTE =========
+    let secretKeySequence = "";
+    const SECRET_CODE = "DURANTE";
+    
+    document.addEventListener("keydown", (e) => {
+      // Ignora se está digitando em input ou textarea
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+      
+      const key = e.key.toUpperCase();
+      
+      // Apenas letras
+      if (/^[A-Z]$/.test(key)) {
+        secretKeySequence += key;
+        
+        // Mantém apenas os últimos 7 caracteres
+        if (secretKeySequence.length > 7) {
+          secretKeySequence = secretKeySequence.slice(-7);
+        }
+        
+        // Verifica se digitou "DURANTE"
+        if (secretKeySequence === SECRET_CODE) {
+          resetprescript();
+          secretKeySequence = ""; // limpa a sequência
+        }
+      }
+    });
+    
+    function resetprescript(){
+      localStorage.removeItem("prescript_date_lcbr");
+      localStorage.removeItem("prescript_text_lcbr");
+      locked = false;
+      btn.classList.remove("fading");
+      terminal.classList.remove("show");
+      textEl.textContent = "";
+      alert("🎲 PRESCRIPTO RESETADO! Você pode receber um novo agora.");
+    }
 
     btn.addEventListener("click", async () => {
       if (locked) return;
+      
+      // Verifica se já usou hoje
+      if (!canUsePrescriptToday()) {
+        locked = true;
+        btn.classList.add("fading");
+        setTimeout(() => terminal.classList.add("show"), 180);
+        
+        const timeLeft = getTimeUntilNextprescript();
+        const previousprescript = getPreviousprescript();
+        const message = previousprescript 
+          ? `JÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}\n\n--- SEU PRESCRIPTO DE HOJE ---\n${previousprescript}`
+          : `JÁ RECEBEU SEU PRESCRIPTO HOJE!\nVOLTE EM ${timeLeft}`;
+        textEl.textContent = message;
+        return;
+      }
+      
       locked = true;
 
       btn.classList.add("fading");
@@ -316,6 +421,9 @@
         
         // seleciona aleatoriamente e digita
         const prescript = pickRandom(list);
+
+        // salva que usou hoje (com o prescripto)
+        savePrescriptUsageToday(prescript);
 
         // delay leve antes de digitar (pra dar drama)
         setTimeout(() => {
