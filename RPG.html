@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prescript</title>
+
+  <!-- 8-bit font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --blue:#67b7ff;
+      --blue2:#1f6bff;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      overflow:hidden;
+    }
+
+    /* subtle vignette + grain */
+    .fx::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        radial-gradient(900px 520px at 50% 85%, rgba(103,183,255,0.06), rgba(0,0,0,0) 60%),
+        radial-gradient(closest-side at 50% 50%, rgba(0,0,0,0), rgba(0,0,0,0.55));
+      pointer-events:none;
+    }
+    .fx::after{
+      content:"";
+      position:fixed; inset:-30%;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+      opacity:.06;
+      mix-blend-mode:screen;
+      pointer-events:none;
+      animation: drift 10s linear infinite;
+    }
+    @keyframes drift{
+      from{ transform:translate3d(0,0,0); }
+      to{ transform:translate3d(6%, -4%, 0); }
+    }
+
+    .wrap{
+      position:relative;
+      height:100%;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      align-items: start;
+      padding-top: 260px;
+    }
+
+    .stage{
+      width:min(900px, 92vw);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:28px;
+    }
+
+    .hero{
+      width:min(550px, 75vw);
+      aspect-ratio: 16/9;
+      overflow:hidden;
+      position:relative;
+      z-index: 10;
+      background-image: url("https://limbuscompany.wiki.gg/images/The_Index_Logo.png");
+      background-size:contain;
+      background-position:center;
+      background-repeat:no-repeat;
+    }
+
+    .controls{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      width:100%;
+      position: relative;
+    }
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.98);
+      color:#000;
+      padding: 28px 48px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-family: inherit;
+      font-size: 18px;
+      letter-spacing: 0.6px;
+      margin-top: 10px;
+      box-shadow:
+        0 0 0 2px rgba(31,107,255,0.0),
+        0 0 22px rgba(103,183,255,0.55),
+        0 0 60px rgba(31,107,255,0.25);
+      transition: transform .12s ease, opacity .28s ease, box-shadow .22s ease;
+      user-select:none;
+    }
+    button:hover{
+      transform: translateY(-1px);
+      box-shadow:
+        0 0 0 2px rgba(31,107,255,0.20),
+        0 0 28px rgba(103,183,255,0.70),
+        0 0 70px rgba(31,107,255,0.30);
+    }
+    button:active{ transform: translateY(0px) scale(0.99); }
+
+    button.fading{
+      pointer-events:none;
+      animation: digitalFade 0.5s ease-out forwards;
+    }
+
+    @keyframes digitalFade{
+      0%{
+        opacity: 1;
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      30%{
+        opacity: 0.8;
+        transform: scale(1.02);
+        filter: brightness(1.3);
+        box-shadow: 
+          0 0 30px rgba(103,183,255,0.8),
+          0 0 60px rgba(31,107,255,0.5),
+          inset 0 0 20px rgba(255,255,255,0.3);
+      }
+      60%{
+        opacity: 0.4;
+        transform: scale(0.98);
+        filter: brightness(1.5);
+        box-shadow: 
+          0 0 40px rgba(103,183,255,1),
+          0 0 80px rgba(31,107,255,0.7);
+      }
+      100%{
+        opacity: 0;
+        transform: scale(0.95);
+        filter: brightness(2);
+        box-shadow: 
+          0 0 50px rgba(103,183,255,0.5),
+          0 0 100px rgba(31,107,255,0.3);
+      }
+    }
+
+    .terminal{
+      position: absolute;
+      top: 1px;
+      left: 0;
+      right: 0;
+      width:min(820px, 92vw);
+      min-height: 148px;
+      padding: 16px;
+      margin: 0 auto;
+      text-align: center;
+      opacity:0;
+      transform: translateY(10px);
+      transition: opacity .35s ease, transform .35s ease;
+      pointer-events: none;
+    }
+    .terminal.show{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    .line{
+      font-size: 22px;
+      line-height: 2.4;
+      color: rgba(255,255,255,0.96);
+      text-shadow:
+        0 0 15px rgba(103,183,255,0.85),
+        0 0 25px rgba(103,183,255,0.60),
+        0 0 35px rgba(31,107,255,0.45);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint{
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: .4px;
+      text-align:center;
+      max-width: 70ch;
+    }
+
+    /* tiny top label, optional */
+    .sig{
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      font-size: 9px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 12px rgba(103,183,255,0.18);
+      user-select:none;
+    }
+
+    @media (max-width: 520px){
+      button{ width: 100%; }
+      .hero{ border-radius: 14px; }
+    }
+  </style>
+</head>
+
+<body class="fx">
+  <div class="sig">THE INDEX // GERADOR DE PRESCRIPTOS // FEITO POR @BESTOOGA</div>
+
+  <div class="wrap">
+    <div class="stage">
+      <div class="hero" aria-label="Imagem principal"></div>
+
+      <div class="controls">
+        <button id="btn">RECEBER PRESCRIPTO</button>
+
+        <div id="terminal" class="terminal" aria-live="polite">
+          <div class="line" id="text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= Carregar prescripts de arquivo externo =========
+    const EXTERNAL_FILE_URL = "./prescriptsRPG.json";
+
+    async function loadExternalPrescripts(){
+      const res = await fetch(EXTERNAL_FILE_URL, { cache: "no-store" });
+      return await res.json();
+    }
+
+    // ========= Seleção aleatória =========
+    function pickRandom(list){
+      const idx = Math.floor(Math.random() * list.length);
+      return list[idx];
+    }
+
+    // ========= Typing effect com roleta de caracteres =========
+    async function typeText(el, text, speedMs = 15){
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*()";
+      
+      el.textContent = "";
+      
+      // Mostra caracteres aleatórios para toda a frase primeiro
+      let display = Array(text.length).fill(0).map(() => 
+        chars[Math.floor(Math.random() * chars.length)]
+      );
+      
+      let resolved = Array(text.length).fill(false);
+      let iterations = 0;
+      const maxIterations = text.length * 1; // controla quantas vezes vai trocar
+      
+      const interval = setInterval(() => {
+        // Atualiza display com caracteres aleatórios ou resolvidos
+        display = display.map((char, index) => {
+          if (resolved[index]) {
+            return text[index];
+          }
+          
+          // Resolve gradualmente da esquerda para direita
+          if (iterations > index * 1) {
+            resolved[index] = true;
+            return text[index];
+          }
+          
+          // Mantém espaços como espaços
+          if (text[index] === ' ') {
+            resolved[index] = true;
+            return ' ';
+          }
+          
+          return chars[Math.floor(Math.random() * chars.length)];
+        });
+        
+        el.textContent = display.join('');
+        iterations++;
+        
+        if (iterations >= maxIterations || resolved.every(r => r)) {
+          clearInterval(interval);
+          el.textContent = text;
+        }
+      }, speedMs);
+    }
+
+    // ========= UI =========
+    const btn = document.getElementById("btn");
+    const terminal = document.getElementById("terminal");
+    const textEl = document.getElementById("text");
+
+    let locked = false;
+
+    btn.addEventListener("click", async () => {
+      if (locked) return;
+      locked = true;
+
+      btn.classList.add("fading");
+
+      // mostra "terminal"
+      setTimeout(() => terminal.classList.add("show"), 180);
+
+      // carrega prescripts do arquivo
+      try{
+        const list = await loadExternalPrescripts();
+        
+        // seleciona aleatoriamente e digita
+        const prescript = pickRandom(list);
+
+        // delay leve antes de digitar (pra dar drama)
+        setTimeout(() => {
+          typeText(textEl, prescript, 40);
+        }, 260);
+      }catch(e){
+        console.error("Erro ao carregar prescripts:", e);
+        textEl.textContent = "Erro ao carregar prescripts. Verifique se prescripts.json existe.";
+        terminal.classList.add("show");
+      }
+    });
+  </script>
+</body>
+</html>
